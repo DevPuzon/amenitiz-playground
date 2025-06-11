@@ -1,0 +1,17 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "@page/*": ["src/pages/*"],
+      "@api/*": ["src/core/api/*"],
+      "@helper/*": ["src/core/helpers/*"],
+      "@model/*": ["src/models/*"]
+    },
+    "types": ["node"]
+  },
+  "files": [],
+  "references": [
+    { "path": "./tsconfig.app.json" },
+    { "path": "./tsconfig.node.json" }
+  ]
+}
