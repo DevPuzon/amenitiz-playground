@@ -1,15 +1,41 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useParams } from "react-router-dom";
 import chessApi from "@api/axios";
 import type { ChessPlayerProfile } from "@model/chess-player.model";
 import { formatTime } from "@helper/common-use.helper";
 
+export const LastOnline = ({ last_online }: { last_online: number }) => {
+  const [timeSinceLastOnline, setTimeSinceLastOnline] = useState("");
+
+  useEffect(() => {
+    if (!last_online) return;
+
+    const interval = setInterval(() => {
+      const now = Math.floor(Date.now() / 1000);
+      const secondsAgo = now - last_online;
+      setTimeSinceLastOnline(formatTime(secondsAgo));
+      // timeSinceLastOnlineRef.current.textContent = formatTime(secondsAgo);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [last_online]);
+
+  return (
+    <>
+      <p>
+        Last online: <span className="font-mono">{timeSinceLastOnline}</span>{" "}
+        ago
+      </p>
+    </>
+  );
+};
 
 export const MasterProfilePage = () => {
+  console.log("MasterProfilePage");
   const { username } = useParams();
   const [profile, setProfile] = useState<ChessPlayerProfile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [timeSinceLastOnline, setTimeSinceLastOnline] = useState("");
+  // const timeSinceLastOnlineRef = useRef(null);
 
   useEffect(() => {
     if (!username) return;
@@ -22,18 +48,6 @@ export const MasterProfilePage = () => {
       .catch((err) => console.error("Failed to fetch profile", err))
       .finally(() => setLoading(false));
   }, [username]);
-
-  useEffect(() => {
-    if (!profile?.last_online) return;
-
-    const interval = setInterval(() => {
-      const now = Math.floor(Date.now() / 1000);
-      const secondsAgo = now - profile.last_online;
-      setTimeSinceLastOnline(formatTime(secondsAgo));
-    }, 1000);
-
-    return () => clearInterval(interval);
-  }, [profile?.last_online]);
 
   if (loading) return <p className="p-6">Loading profile...</p>;
   if (!profile) return <p className="p-6">Profile not found.</p>;
@@ -64,10 +78,7 @@ export const MasterProfilePage = () => {
         <p>League: {profile.league}</p>
         <p>Status: {profile.status}</p>
         <p>Followers: {profile.followers}</p>
-        <p>
-          Last online: <span className="font-mono">{timeSinceLastOnline}</span>{" "}
-          ago
-        </p>
+        <LastOnline last_online={profile.last_online}></LastOnline>
       </div>
     </div>
   );
